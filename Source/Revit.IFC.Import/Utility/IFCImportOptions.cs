@@ -135,12 +135,6 @@ namespace Revit.IFC.Import.Utility
       public bool CreateDuplicateContainerGeometry { get; protected set; } = true;
 
       /// <summary>
-      /// If true, process the HasAssignments INVERSE attribute.  If false, ignore.
-      /// This is necessary because the default IFC2x3_TC1 EXPRESS schema file is (incorrectly) missing this inverse attribute.
-      /// </summary>
-      public bool AllowUseHasAssignments { get; set; } = false;
-
-      /// <summary>
       /// If this value is false, then, if we find an already created Revit file corresponding to the IFC file,
       /// and it is up-to-date (that is, the saved timestamp and file size on the RVT file are the same as on the IFC file),
       /// then we won't import and instead use the existing RVT file.  If this value is true (default), we will
@@ -180,6 +174,8 @@ namespace Revit.IFC.Import.Utility
       /// The action to be taken.  Open and link are currently allowed.
       /// </summary>
       public IFCImportAction Action { get; protected set; } = IFCImportAction.Open;
+
+      public IIFCFileProcessor Processor { get; protected set; }
 
       protected IFCImportOptions()
       {
@@ -269,6 +265,28 @@ namespace Revit.IFC.Import.Utility
          Int64? timestamp = OptionsUtil.GetNamedInt64Option(options, "FileModifiedTime", true);
          if (timestamp.HasValue)
             OriginalTimeStamp = OriginalTimeStamp.AddSeconds(timestamp.Value);
+
+         // NAVIS_TODO: Move the processor out of options.
+         string alternativeProcessor = OptionsUtil.GetNamedStringOption(options, "AlternativeProcessor");
+         if (!string.IsNullOrWhiteSpace(alternativeProcessor))
+         {
+            try
+            {
+               Type processorType = Type.GetType(alternativeProcessor);
+
+               object processor = Activator.CreateInstance(processorType);
+               if (typeof(IIFCFileProcessor).IsInstanceOfType(processor))
+               {
+                  Processor = processor as IIFCFileProcessor;
+               }
+            }
+            catch (Exception)
+            {
+            }
+         }
+
+         if (Processor == null)
+            Processor = new IFCDefaultProcessor();
       }
 
       /// <summary>

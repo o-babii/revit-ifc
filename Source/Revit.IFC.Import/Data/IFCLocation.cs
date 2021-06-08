@@ -36,6 +36,11 @@ namespace Revit.IFC.Import.Data
       /// Determines whether we should fix the origin of the IFCLocation
       /// if it is too far from the origin for Revit's standards.
       /// </summary>
+      /// <remarks>
+      /// This is intended for IfcBuilding and IfcBuildingStorey.
+      /// IfcSite has a more robust implementation for getting around far origins,
+      /// and in a well-structured IFC file, this should not be necessary.
+      /// </remarks>
       private static bool FixFarawayLocationOrigin { get; set; } = false;
 
       /// <summary>
@@ -56,9 +61,10 @@ namespace Revit.IFC.Import.Data
          /// </summary>
          public IFCLocationChecker(IFCProduct product)
          {
+            // We don't need to do this fixup if something else is consuming the content
             LastFixFarawayLocationOrigin = FixFarawayLocationOrigin;
-            FixFarawayLocationOrigin = (product != null) &&
-               ((product is IFCBuilding) || (product is IFCBuildingStorey));
+            FixFarawayLocationOrigin = Importer.TheProcessor.ShouldFixFarAwayLocation &&
+               (product != null) && ((product is IFCBuilding) || (product is IFCBuildingStorey));
          }
 
          public void Dispose()
@@ -104,6 +110,22 @@ namespace Revit.IFC.Import.Data
       protected IFCLocation()
       {
 
+      }
+
+      /// <summary>
+      /// Create a dummy IFCLocation that contains only a relative transform.
+      /// </summary>
+      /// <param name="relativeTransform">The transform associated with the location.</param>
+      /// <returns>The new IFCLocation.</returns>
+      /// <remarks>
+      /// This is intended for use for IFCSites, whose location has either been modified
+      /// by the RefElevation parameter, or by being moved far from the origin.
+      /// </remarks>
+      static public IFCLocation CreateDummyLocation(Transform relativeTransform)
+      {
+         IFCLocation dummyLocation = new IFCLocation();
+         dummyLocation.RelativeTransform = relativeTransform;
+         return dummyLocation;
       }
 
       /// <summary>
@@ -321,16 +343,6 @@ namespace Revit.IFC.Import.Data
             return (location as IFCLocation);
 
          return new IFCLocation(ifcObjectPlacement);
-      }
-
-      /// <summary>
-      /// Removes the relative transform for a site.
-      /// </summary>
-      public static void RemoveRelativeTransformForSite(IFCSite site)
-      {
-         if (site == null || site.ObjectLocation == null || site.ObjectLocation.RelativeTransform == null)
-            return;
-         site.ObjectLocation.RelativeTransform = Transform.Identity;
       }
    }
 }

@@ -69,10 +69,18 @@ namespace Revit.IFC.Import.Data
       {
          base.Process(ifcGroup);
 
-         ICollection<IFCAnyHandle> isGroupedByList =
-             IFCAnyHandleUtil.GetAggregateInstanceAttribute<HashSet<IFCAnyHandle>>(ifcGroup, "IsGroupedBy");
-         foreach (IFCAnyHandle isGroupedBy in isGroupedByList)
-            ProcessIFCRelAssignsToGroup(isGroupedBy);
+         if (IFCImportFile.TheFile.SchemaVersionAtLeast(IFCSchemaVersion.IFC4))
+         {
+            ICollection<IFCAnyHandle> isGroupedByList =
+               IFCAnyHandleUtil.GetAggregateInstanceAttribute<HashSet<IFCAnyHandle>>(ifcGroup, "IsGroupedBy");
+            foreach (IFCAnyHandle isGroupedBy in isGroupedByList)
+               ProcessIFCRelAssignsToGroup(isGroupedBy);
+         }
+         else
+         {
+            IFCAnyHandle isGroupedByHnd = IFCAnyHandleUtil.GetInstanceAttribute(ifcGroup, "IsGroupedBy");
+            ProcessIFCRelAssignsToGroup(isGroupedByHnd);
+         }
       }
 
       protected IFCGroup()
@@ -113,9 +121,20 @@ namespace Revit.IFC.Import.Data
             return cachedIFCGroup as IFCGroup;
 
          if (IFCAnyHandleUtil.IsValidSubTypeOf(ifcGroup, IFCEntityType.IfcZone))
-            return IFCZone.ProcessIFCZone(ifcGroup);
+         {
+            IFCZone ifcZone = IFCZone.ProcessIFCZone(ifcGroup);
+            if (ifcZone != null)
+               IFCImportFile.TheFile.OtherEntitiesToCreate.Add(ifcZone);
+            return ifcZone;
+         }
+
          if (IFCAnyHandleUtil.IsValidSubTypeOf(ifcGroup, IFCEntityType.IfcSystem))
-            return IFCSystem.ProcessIFCSystem(ifcGroup);
+         {
+            IFCSystem ifcSystem = IFCSystem.ProcessIFCSystem(ifcGroup);
+            if (ifcSystem != null)
+               IFCImportFile.TheFile.OtherEntitiesToCreate.Add(ifcSystem);
+            return ifcSystem;
+         }
 
          return new IFCGroup(ifcGroup);
       }
