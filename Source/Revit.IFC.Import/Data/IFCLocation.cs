@@ -113,22 +113,6 @@ namespace Revit.IFC.Import.Data
       }
 
       /// <summary>
-      /// Create a dummy IFCLocation that contains only a relative transform.
-      /// </summary>
-      /// <param name="relativeTransform">The transform associated with the location.</param>
-      /// <returns>The new IFCLocation.</returns>
-      /// <remarks>
-      /// This is intended for use for IFCSites, whose location has either been modified
-      /// by the RefElevation parameter, or by being moved far from the origin.
-      /// </remarks>
-      static public IFCLocation CreateDummyLocation(Transform relativeTransform)
-      {
-         IFCLocation dummyLocation = new IFCLocation();
-         dummyLocation.RelativeTransform = relativeTransform;
-         return dummyLocation;
-      }
-
-      /// <summary>
       /// Constructs an IFCLocation from the IfcObjectPlacement handle.
       /// </summary>
       /// <param name="ifcObjectPlacement">The IfcObjectPlacement handle.</param>

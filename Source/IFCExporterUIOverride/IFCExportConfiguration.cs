@@ -333,11 +333,13 @@ namespace BIM.IFC.Export.UI
       /// <summary>
       /// The name of the configuration.
       /// </summary>
+      [ScriptIgnore] 
       public string Name { get; set; } = "";
 
       /// <summary>
       /// Id of the active view.
       /// </summary>
+      [ScriptIgnore] 
       public int ActiveViewId { get; set; } = ElementId.InvalidElementId.IntegerValue;
 
       private bool m_isBuiltIn = false;
@@ -347,6 +349,7 @@ namespace BIM.IFC.Export.UI
       /// <summary>
       /// Whether the configuration is builtIn or not.
       /// </summary>
+      [ScriptIgnore]
       public bool IsBuiltIn
       {
          get
@@ -358,6 +361,7 @@ namespace BIM.IFC.Export.UI
       /// <summary>
       /// Whether the configuration is in-session or not.
       /// </summary>
+      [ScriptIgnore]
       public bool IsInSession
       {
          get
@@ -567,6 +571,7 @@ namespace BIM.IFC.Export.UI
       /// <summary>
       /// Identifies the version selected by the user.
       /// </summary>
+      [ScriptIgnore]
       public String FileVersionDescription
       {
          get

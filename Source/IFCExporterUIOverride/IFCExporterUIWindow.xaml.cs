@@ -104,7 +104,11 @@ namespace BIM.IFC.Export.UI
          configuration.GeoRefMapUnit = crsInfo.uom;
          if (!string.IsNullOrWhiteSpace(crsInfo.epsgCode))
          {
-            configuration.GeoRefEPSGCode = crsInfo.epsgCode;
+            // Some time crsInfo returns a different epsgCode. In this case retain the original code if specified
+            if (!string.IsNullOrEmpty(newEPSGCode))
+               configuration.GeoRefEPSGCode = newEPSGCode;
+            else
+               configuration.GeoRefEPSGCode = crsInfo.epsgCode;
          }
          else
          {
@@ -822,12 +826,12 @@ namespace BIM.IFC.Export.UI
       private IFCExportConfiguration GetSelectedConfiguration()
       {
          IFCExportConfiguration configuration = (IFCExportConfiguration)listBoxConfigurations.SelectedItem;
-         if (configuration == null)
-         {
-            configuration = IFCExportConfiguration.CreateDefaultConfiguration();
-            IFCExportConfiguration.SetInSession(configuration);
-            listBoxConfigurations.SelectedItem = configuration;
-         }
+         //if (configuration == null)
+         //{
+         //   configuration = IFCExportConfiguration.CreateDefaultConfiguration();
+         //   IFCExportConfiguration.SetInSession(configuration);
+         //   listBoxConfigurations.SelectedItem = configuration;
+         //}
          return configuration;
       }
 

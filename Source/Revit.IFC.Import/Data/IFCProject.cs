@@ -282,17 +282,6 @@ namespace Revit.IFC.Import.Data
             grid.Name = Guid.NewGuid().ToString();
          }
 
-         // Pre-process sites to orient them properly.
-         IList<IFCSite> sites = new List<IFCSite>();
-         foreach (IFCObjectDefinition objectDefinition in ComposedObjectDefinitions)
-         {
-            if (objectDefinition is IFCSite)
-            {
-               sites.Add(objectDefinition as IFCSite);
-            }
-         }
-         IFCSite.ProcessSiteLocations(doc, sites);
-               
          base.Create(doc);
 
          // IfcProject usually won't create an element, as it contains no geometry.
